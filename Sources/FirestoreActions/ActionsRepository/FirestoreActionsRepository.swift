@@ -14,7 +14,7 @@ import Combine
 /// This repository provides a Combine-based abstraction layer over the Firebase SDK,
 /// allowing for reactive data handling and custom error mapping.
 public protocol FirestoreActionsRepositoryType {
-
+    
     // MARK: - Fetching Data
     
     /// Fetches a document and decodes it into a specific Codable type.
@@ -73,6 +73,37 @@ public protocol FirestoreActionsRepositoryType {
     /// - Returns: A publisher emitting the deleted document ID upon success.
     func deleteDocument(_ documentReference: DocumentReference) -> AnyPublisher<String, FirestoreActionsError>
     
+    // MARK: - Real-time Observation
+    
+    /// Establishes a real-time stream for a single document, decoding it into a `Codable` type.
+    ///
+    /// The publisher will emit a new value every time the server-side document is modified.
+    /// - Parameter ref: The `DocumentReference` to observe.
+    /// - Returns: A tuple containing:
+    ///   - `AnyPublisher<T, FirestoreActionsError>`: The reactive data stream.
+    ///   - `ListenerRegistration`: A handle used to stop the listener.
+    func listenDocument<T: Codable>(_ ref: DocumentReference) -> (AnyPublisher<T, FirestoreActionsError>, ListenerRegistration)
+    
+    /// Establishes a real-time stream for a single document as a raw dictionary.
+    ///
+    /// - Parameter ref: The `DocumentReference` to observe.
+    /// - Returns: A tuple containing the publisher emitting `[String: Any]` and the listener registration.
+    func listenDocument(_ ref: DocumentReference) -> (AnyPublisher<[String: Any], FirestoreActionsError>, ListenerRegistration)
+    
+    /// Establishes a real-time stream for an entire collection or query, decoding results into an array.
+    ///
+    /// - Parameter query: The `Query` or `CollectionReference` to observe.
+    /// - Returns: A tuple containing:
+    ///   - `AnyPublisher<[T], FirestoreActionsError>`: A stream of updated document arrays.
+    ///   - `ListenerRegistration`: A handle used to stop the listener.
+    func listenCollection<T: Codable>(_ query: Query) -> (AnyPublisher<[T], FirestoreActionsError>, ListenerRegistration)
+    
+    /// Establishes a real-time stream for a collection or query as an array of raw dictionaries.
+    ///
+    /// - Parameter query: The `Query` to observe.
+    /// - Returns: A tuple containing the publisher emitting `[[String: Any]]` and the listener registration.
+    func listenCollection(_ query: Query) -> (AnyPublisher<[[String: Any]], FirestoreActionsError>, ListenerRegistration)
+    
     // MARK: - Utility Operations
     
     /// Checks if a specific document exists in the database.
@@ -90,7 +121,6 @@ public protocol FirestoreActionsRepositoryType {
 /// This class handles the low-level communication with Firestore and converts
 /// results into Combine publishers.
 public final class FirestoreActionsRepository: FirestoreActionsRepositoryType {
-    
     public init() {}
     
     // MARK: - Generics Wrapper
@@ -99,8 +129,8 @@ public final class FirestoreActionsRepository: FirestoreActionsRepositoryType {
     ///
     /// - Parameter action: A closure that provides a result handler for the Firestore operation.
     /// - Returns: An `AnyPublisher` that handles error mapping to `FirestoreActionsError`.
-    private func perform<T>(_ action: @escaping (@escaping (Result<T, FirestoreActionsError>) -> Void) -> Void) -> AnyPublisher<T, FirestoreActionsError> {
-        Future<T, FirestoreActionsError> { [weak self] promise in
+    internal func perform<T>(_ action: @escaping (@escaping (Result<T, FirestoreActionsError>) -> Void) -> Void) -> AnyPublisher<T, FirestoreActionsError> {
+        Future<T, FirestoreActionsError> { promise in
             action { result in
                 promise(result)
             }
@@ -127,7 +157,7 @@ public final class FirestoreActionsRepository: FirestoreActionsRepositoryType {
                 if let documentSnapshot = documentSnapshot {
                     completion(.success(documentSnapshot.exists))
                 } else {
-                    completion(.failure(.getDocumentError))
+                    completion(.failure(.getDocumentError(nil)))
                 }
             }
         }

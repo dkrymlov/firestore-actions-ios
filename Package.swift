@@ -4,12 +4,14 @@
 import PackageDescription
 
 let package = Package(
-    name: "FirestoreActions",
-    platforms: [.iOS(.v16), .macOS(.v13), .tvOS(.v16), .watchOS(.v9), .visionOS(.v1)],
+    name: "FirebaseActions",
+    platforms: [.iOS(.v16), .macOS(.v13), .watchOS(.v9), .tvOS(.v16), .visionOS(.v1)],
     products: [
         .library(
-            name: "FirestoreActions",
-            targets: ["FirestoreActions"]
+            name: "FirebaseActions",
+            targets: [
+                "FirestoreActions"
+            ]
         ),
     ],
     dependencies: [
@@ -22,6 +24,6 @@ let package = Package(
                 .product(name: "FirebaseFirestore", package: "firebase-ios-sdk")
             ],
             path: "Sources"
-        ),
-    ]
+        )
+    ],
 )

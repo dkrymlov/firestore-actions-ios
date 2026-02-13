@@ -30,20 +30,21 @@ extension FirestoreActionsRepository {
                     completion(.failure(.addDocumentError(error)))
                 }
             }
+            
             completion(.success(ref.documentID))
         })
     }
     
-    /// Adds a new document to a collection by encoding an `Encodable` object.
+    /// Adds a new document to a collection by encoding an `Codable` object.
     ///
     /// This method leverages Firestore's built-in Codable support to map your Swift models
     /// directly to Firestore documents.
     ///
     /// - Parameters:
     ///   - collectionReference: The Firestore `CollectionReference` where the document will be created.
-    ///   - documentData: The `Encodable` (usually `Codable`) model instance to store.
+    ///   - documentData: The `Codable` (usually `Codable`) model instance to store.
     /// - Returns: A publisher that emits the generated `documentID` string on success, or a `FirestoreActionsError` on failure.
-    public func addDocument<T: Encodable>(
+    public func addDocument<T: Codable>(
         to collectionReference: CollectionReference,
         from documentData: T
     ) -> AnyPublisher<String, FirestoreActionsError> {
@@ -54,6 +55,7 @@ extension FirestoreActionsRepository {
                         completion(.failure(.addDocumentError(error)))
                     }
                 }
+                
                 completion(.success(ref.documentID))
             } catch {
                 completion(.failure(.addDocumentError(error)))

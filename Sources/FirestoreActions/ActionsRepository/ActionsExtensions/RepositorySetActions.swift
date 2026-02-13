@@ -12,15 +12,15 @@ import Combine
 /// Extension for setting (overwriting or creating) document data at a specific reference.
 extension FirestoreActionsRepository {
     
-    /// Sets the data of a document using an `Encodable` object.
+    /// Sets the data of a document using an `Codable` object.
     ///
     /// - Note: This operation will overwrite any existing document at the specified reference.
     ///
     /// - Parameters:
     ///   - documentReference: The `DocumentReference` where the data will be written.
-    ///   - documentData: The `Encodable` model instance to write to Firestore.
+    ///   - documentData: The `Codable` model instance to write to Firestore.
     /// - Returns: A publisher emitting the `documentID` on success.
-    public func setDocument<T: Encodable>(
+    public func setDocument<T: Codable>(
         _ documentReference: DocumentReference,
         from documentData: T
     ) -> AnyPublisher<String, FirestoreActionsError> {
@@ -30,8 +30,9 @@ extension FirestoreActionsRepository {
                     if let error = error {
                         completion(.failure(.setDocumentError(error)))
                     }
+                    
+                    completion(.success(documentReference.documentID))
                 }
-                completion(.success(documentReference.documentID))
             } catch {
                 completion(.failure(.setDocumentError(error)))
             }
@@ -56,8 +57,9 @@ extension FirestoreActionsRepository {
                 if let error = error {
                     completion(.failure(.setDocumentError(error)))
                 }
+                
+                completion(.success(documentReference.documentID))
             }
-            completion(.success(documentReference.documentID))
         }
     }
 }

@@ -29,8 +29,9 @@ extension FirestoreActionsRepository {
                     completion(.failure(.deleteDocumentError(error)))
                     return
                 }
+                
+                completion(.success(documentReference.documentID))
             }
-            completion(.success(documentReference.documentID))
         }
     }
 }

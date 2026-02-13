@@ -14,11 +14,11 @@ extension FirestoreActionsRepository {
     
     // MARK: - Single Document
     
-    /// Fetches a single document and decodes it into a Decodable type.
+    /// Fetches a single document and decodes it into a Codable type.
     ///
     /// - Parameter documentReference: The path to the document.
     /// - Returns: A publisher emitting the decoded type `T` or a `FirestoreActionsError`.
-    public func getDocument<T: Decodable>(
+    public func getDocument<T: Codable>(
         _ documentReference: DocumentReference
     ) -> AnyPublisher<T, FirestoreActionsError> {
         perform { completion in
@@ -29,7 +29,7 @@ extension FirestoreActionsRepository {
                 }
                 
                 guard let snapshot = documentSnapshot, snapshot.exists else {
-                    completion(.failure(.getDocumentError))
+                    completion(.failure(.getDocumentError(nil)))
                     return
                 }
                 
@@ -60,7 +60,7 @@ extension FirestoreActionsRepository {
                 if let data = documentSnapshot?.data() {
                     completion(.success(data))
                 } else {
-                    completion(.failure(.getDocumentError))
+                    completion(.failure(.getDocumentError(nil)))
                 }
             }
         }
@@ -72,7 +72,7 @@ extension FirestoreActionsRepository {
     ///
     /// - Parameter collectionQuery: The Firestore `Query` to execute.
     /// - Returns: A publisher emitting an array of type `[T]`.
-    public func getDocuments<T: Decodable>(
+    public func getDocuments<T: Codable>(
         _ collectionQuery: Query
     ) -> AnyPublisher<[T], FirestoreActionsError> {
         perform { completion in

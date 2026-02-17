@@ -67,7 +67,7 @@ repository.getDocument(ref)
         if case .failure(let error) = completion {
             print("Error fetching user: \(error)")
         }
-    }, receiveValue: { (user: UserProfile) in
+    }, receiveValue: { user in
         print("User fetched successfully: \(user.username)")
     })
     .store(in: &cancellables)
@@ -99,9 +99,12 @@ let query = Firestore.firestore().collection("messages").order(by: "timestamp")
 // Returns a publisher AND a listener registration token
 let (publisher, listener) = repository.listenCollection(query)
 
+// Attach listener registration and keep it while it`s active
 listenerRegistration = listener
+
 publisher
-    .sink(receiveCompletion: { _ in }, receiveValue: { (messages: [Message]) in
+    .receive(on: DispatchQueue.main)
+    .sink(receiveCompletion: { _ in }, receiveValue: { messages in
         // Update your UI state here
         self.messages = messages
     })
@@ -111,3 +114,69 @@ publisher
 // listener.remove()
 // listener = nil
 ```
+
+## ⚡️ Advanced: Concurrency
+One of the biggest benefits of FirestoreActions is the ability to run operations in parallel without nesting closures.
+
+### Parallel Fetching (Zip)
+Fetch a `User` profile and their `Settings` document at the same time.
+
+```swift
+let userRef = Firestore.firestore().collection("users").document("uid_1")
+let settingsRef = Firestore.firestore().collection("settings").document("uid_1")
+
+let userPub: AnyPublisher<User, FirestoreActionsError> = repository.getDocument(userRef)
+let settingsPub: AnyPublisher<Settings, FirestoreActionsError> = repository.getDocument(settingsRef)
+
+Publishers.Zip(userPub, settingsPub)
+    .receive(on: DispatchQueue.main)
+    .sink(receiveCompletion: { _ in }, receiveValue: { user, settings in
+        // Both requests have completed successfully
+        self.configure(user: user, settings: settings)
+    })
+    .store(in: &cancellables)
+```
+
+### Chained Operations (FlatMap)
+Create a user, and then immediately create a welcome message for them.
+
+```swift
+repository.addDocument(to: usersCol, from: newUser)
+    .flatMap { userId in
+        // Use the new ID to create a sub-document
+        let welcomeMsg = Message(text: "Welcome!")
+        return self.repository.addDocument(to: msgsCol, from: welcomeMsg)
+    }
+    .receive(on: DispatchQueue.main)
+    .sink(receiveCompletion: { _ in }, receiveValue: { msgId in
+        print("User and Welcome Message created!")
+    })
+    .store(in: &cancellables)
+```
+
+## 📋 API Reference
+
+The `FirestoreActionsRepositoryType` protocol defines a standard reactive interface for Firestore. All methods return a Combine `AnyPublisher` or a tuple containing a publisher and a `ListenerRegistration`.
+
+### Fetching & Utility
+* `getDocument<T: Codable>(_ ref: DocumentReference) -> AnyPublisher<T, FirestoreActionsError>`
+* `getDocument(_ ref: DocumentReference) -> AnyPublisher<[String: Any], FirestoreActionsError>`
+* `checkDocumentExists(_ ref: DocumentReference) -> AnyPublisher<Bool, FirestoreActionsError>`
+* `checkDocumentsCount(_ query: Query) -> AnyPublisher<Int, FirestoreActionsError>`
+
+### Writing & Deleting
+* `addDocument<T: Codable>(to ref: CollectionReference, from data: T) -> AnyPublisher<String, FirestoreActionsError>`
+* `addDocument(to ref: CollectionReference, from rawData: [String: Any]) -> AnyPublisher<String, FirestoreActionsError>`
+* `setDocument<T: Codable>(_ ref: DocumentReference, from data: T) -> AnyPublisher<String, FirestoreActionsError>`
+* `updateDocument(_ ref: DocumentReference, updatedFields: [String: Any]) -> AnyPublisher<String, FirestoreActionsError>`
+* `deleteDocument(_ ref: DocumentReference) -> AnyPublisher<String, FirestoreActionsError>`
+
+### Real-time Observation
+* `listenDocument<T: Codable>(_ ref: DocumentReference) -> (AnyPublisher<T, FirestoreActionsError>, ListenerRegistration)`
+* `listenCollection<T: Codable>(_ query: Query) -> (AnyPublisher<[T], FirestoreActionsError>, ListenerRegistration)`
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License**.

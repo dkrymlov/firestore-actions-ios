@@ -1,9 +1,9 @@
 # FirestoreActions
 
-[![Swift](https://img.shields.io/badge/Swift-5.9+-orange.svg)](https://swift.org)
-[![Platform](https://img.shields.io/badge/Platform-iOS%2016%2B-blue.svg)](https://developer.apple.com/ios/)
-[![Swift Package Manager](https://img.shields.io/badge/SPM-compatible-brightgreen.svg)](https://swift.org/package-manager/)
-[![License](https://img.shields.io/badge/License-MIT-lightgrey.svg)](LICENSE)
+![Swift](https://img.shields.io/badge/Swift-5.9+-orange.svg)
+![Platforms](https://img.shields.io/badge/Platforms-iOS%2016%20|%20macOS%2013%20|%20watchOS%209%20|%20tvOS%2016%20|%20visionOS%201-blue.svg)
+![License](https://img.shields.io/badge/License-MIT-lightgrey.svg)
+![Swift Package Manager](https://img.shields.io/badge/SPM-compatible-brightgreen.svg)
 
 **FirestoreActions** is a lightweight, protocol-oriented wrapper for Google Firestore that bridges the gap between Firebase's callback-based API and Apple's **Combine** framework.
 

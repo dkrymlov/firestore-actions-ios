@@ -27,6 +27,16 @@ public protocol FirestoreActionsRepositoryType {
     /// - Returns: A publisher emitting a dictionary or a `FirestoreActionsError`.
     func getDocument(_ documentReference: DocumentReference) -> AnyPublisher<[String: Any], FirestoreActionsError>
     
+    /// Fetches documents as an array of Codable objects.
+    /// - Parameter collectionQuery: The Firestore collection query.
+    /// - Returns: A publisher emitting an array of Codable documents or a `FirestoreActionsError`.
+    func getDocuments<T: Codable>(_ collectionQuery: Query) -> AnyPublisher<[T], FirestoreActionsError>
+    
+    /// Fetches documents as an array of raw dictionary of key-value pairs.
+    /// - Parameter collectionQuery: The Firestore collection query.
+    /// - Returns: A publisher emitting an array of raw dictionary of key-value pairs or a `FirestoreActionsError`.
+    func getDocuments(_ collectionQuery: Query) -> AnyPublisher<[[String: Any]], FirestoreActionsError>
+    
     // MARK: - Adding Data
     
     /// Adds a new document to a collection using a raw dictionary.

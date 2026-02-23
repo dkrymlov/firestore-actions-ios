@@ -10,12 +10,14 @@ let package = Package(
         .library(
             name: "FirebaseActions",
             targets: [
-                "FirestoreActions"
+                "FirestoreActions",
+                "AuthActions"
             ]
         ),
     ],
     dependencies: [
-        .package(url: "https://github.com/firebase/firebase-ios-sdk.git", from: "11.0.0")
+        .package(url: "https://github.com/firebase/firebase-ios-sdk.git", from: "11.0.0"),
+        .package(url: "https://github.com/google/GoogleSignIn-iOS.git", from: "9.1.0")
     ],
     targets: [
         .target(
@@ -23,7 +25,16 @@ let package = Package(
             dependencies: [
                 .product(name: "FirebaseFirestore", package: "firebase-ios-sdk")
             ],
-            path: "Sources"
+            path: "Sources/FirestoreActions"
+        ),
+        .target(
+            name: "AuthActions",
+            dependencies: [
+                .product(name: "FirebaseAuth", package: "firebase-ios-sdk"),
+                .product(name: "FirebaseCore", package: "firebase-ios-sdk"),
+                .product(name: "GoogleSignIn", package: "GoogleSignIn-iOS")
+            ],
+            path: "Sources/AuthActions"
         )
     ],
 )

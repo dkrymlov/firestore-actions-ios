@@ -7,8 +7,25 @@
 
 import Foundation
 import CryptoKit
+import AuthenticationServices
 
 extension AuthActionsRepository {
+    
+    /// Prepares an Apple Sign-In authorization request by configuring its nonce and scopes.
+    ///
+    /// This method performs the following actions:
+    /// 1. Generates a raw random nonce and stores it in the `currentNonce` property.
+    /// 2. Requests the `.fullName` and `.email` scopes from the user.
+    /// 3. Computes the SHA-256 hash of the nonce and assigns it to the request to ensure payload integrity.
+    ///
+    /// - Parameter request: The `ASAuthorizationAppleIDRequest` provided by the Apple Sign-In button or authorization controller.
+    public func handleSignInWithAppleRequest(_ request: ASAuthorizationAppleIDRequest) {
+        // Note: Make sure to use the correct method name you defined earlier
+        let nonce = generateRandomNonce()
+        self.currentNonce = nonce
+        request.requestedScopes = [.fullName, .email]
+        request.nonce = sha256(nonce)
+    }
     
     /// Computes the SHA-256 hash of a given string.
     ///

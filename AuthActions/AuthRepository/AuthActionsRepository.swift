@@ -56,6 +56,15 @@ public protocol AuthActionsRepositoryType {
     /// - Returns: A publisher that emits `Void` upon successfully sending the email, or a `ResetPasswordError` on failure.
     func resetPassword(for email: String) -> AnyPublisher<Void, ResetPasswordError>
     
+    /// Prepares an Apple Sign-In authorization request with a secure nonce and required scopes.
+    ///
+    /// This method must be called before presenting the Apple Sign-In authorization controller.
+    /// It generates a cryptographically secure nonce, stores it for later verification,
+    /// hashes it, and attaches the hashed nonce to the request to prevent replay attacks.
+    ///
+    /// - Parameter request: The `ASAuthorizationAppleIDRequest` to configure.
+    func handleSignInWithAppleRequest(_ request: ASAuthorizationAppleIDRequest)
+    
     /// Signs out the currently authenticated user.
     ///
     /// - Returns: A publisher that emits `Void` on successful sign out, or a `SignOutError` on failure.

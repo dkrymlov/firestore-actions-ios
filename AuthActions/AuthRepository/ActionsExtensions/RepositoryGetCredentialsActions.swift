@@ -8,9 +8,13 @@
 import Combine
 import FirebaseAuth
 import FirebaseCore
+#if canImport(UIKit)
 import UIKit
+#endif
 import GoogleSignIn
 import AuthenticationServices
+
+
 
 extension AuthActionsRepository {
     
@@ -22,6 +26,7 @@ extension AuthActionsRepository {
     /// - Returns: A publisher that emits a Google `AuthCredential` on success, or a `FetchCredentialsError` on failure.
     internal func getGoogleCredential() -> AnyPublisher<AuthCredential, FetchCredentialsError> {
         perform { completion in
+            #if canImport(UIKit)
             guard let clientID = FirebaseApp.app()?.options.clientID,
                   let screen = UIApplication.shared.connectedScenes.first as? UIWindowScene,
                   let presenting = screen.windows.first?.rootViewController else {
@@ -46,6 +51,9 @@ extension AuthActionsRepository {
                 
                 completion(.success(credential))
             }
+            #else
+            completion(.failure(.unknownError))
+            #endif
         }
     }
     

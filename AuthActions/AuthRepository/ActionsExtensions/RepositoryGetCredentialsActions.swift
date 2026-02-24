@@ -35,7 +35,7 @@ extension AuthActionsRepository {
             }
             
             GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientID)
-            GIDSignIn.sharedInstance.signIn(withPresenting: presenting, additionalScopes: ["email"]) { result, error in
+            GIDSignIn.sharedInstance.signIn(withPresenting: presenting, hint: nil, additionalScopes: ["email"]) { result, error in
                 if let error {
                     completion(.failure(.googleSignInError(error)))
                     return

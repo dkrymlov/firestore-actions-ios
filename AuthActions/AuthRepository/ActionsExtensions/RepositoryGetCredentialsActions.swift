@@ -35,7 +35,7 @@ extension AuthActionsRepository {
             }
             
             GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientID)
-            GIDSignIn.sharedInstance.signIn(withPresenting: presenting) { result, error in
+            GIDSignIn.sharedInstance.signIn(withPresenting: presenting, additionalScopes: ["email"]) { result, error in
                 if let error {
                     completion(.failure(.googleSignInError(error)))
                     return
@@ -82,7 +82,7 @@ extension AuthActionsRepository {
                         return
                     }
                     
-                    let credential = OAuthProvider.appleCredential(withIDToken: idTokenString, rawNonce: nonce, fullName: nil)
+                    let credential = OAuthProvider.appleCredential(withIDToken: idTokenString, rawNonce: nonce, fullName: appleIDCredential.fullName)
                     
                     completion(.success(credential))
                 default:
